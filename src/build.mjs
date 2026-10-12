@@ -2,8 +2,8 @@
  * 정적 사이트 빌드. 외부 의존성 없이 Node 표준 라이브러리만 쓴다.
  *   node src/build.mjs   →  dist/
  *
- * 호스팅은 Cloudflare Pages 다. `_headers` 와 `_redirects` 를 publish 폴더에 떨어뜨리면
- * 그대로 읽힌다(Netlify 와 같은 형식이라 옮겨 붙여도 동작한다).
+ * 호스팅은 Netlify 다. `_headers` 와 `_redirects` 를 publish 폴더에 떨어뜨리면 그대로 읽힌다.
+ * ★같은 두 파일을 Cloudflare 도 읽으므로 호스트를 옮겨도 빌드를 고칠 일이 없다.
  */
 import fs from 'node:fs';
 import crypto from 'node:crypto';
@@ -27,8 +27,9 @@ const cfg = read('data/site.config.json');
 const courses = read('data/courses.json');
 const data = read('data/regions.json');
 
-// Cloudflare Pages 가 넣어 주는 주소를 먼저 쓴다(미리보기 배포에서도 canonical 이 맞는다).
-const siteUrl = (process.env.SITE_URL || process.env.CF_PAGES_URL || cfg.siteUrl).replace(/\/+$/, '');
+// 호스트가 넣어 주는 주소를 먼저 쓴다(미리보기 배포에서도 canonical 이 맞는다).
+//   Netlify → URL · Cloudflare Pages → CF_PAGES_URL · 직접 지정 → SITE_URL
+const siteUrl = (process.env.SITE_URL || process.env.URL || process.env.CF_PAGES_URL || cfg.siteUrl).replace(/\/+$/, '');
 const updated = new Date().toISOString().slice(0, 10);
 
 const regions = data.sido;
@@ -230,7 +231,7 @@ ${regions.map((r) => `- [${r.name}](${siteUrl}/${r.slug}/): ${r.main ? `시군�
 ${siteUrl}/sitemap.xml
 `);
 
-/* ── _headers · _redirects (Cloudflare Pages 가 그대로 읽는다) ── */
+/* ── _headers · _redirects (Netlify·Cloudflare 둘 다 그대로 읽는다) ── */
 fs.writeFileSync(path.join(DIST, '_headers'), `/*
   X-Content-Type-Options: nosniff
   X-Frame-Options: SAMEORIGIN
@@ -259,7 +260,7 @@ fs.writeFileSync(path.join(DIST, '_headers'), `/*
   Content-Type: text/plain; charset=utf-8
 `);
 
-fs.writeFileSync(path.join(DIST, '_redirects'), `/index.html   /   301
+fs.writeFileSync(path.join(DIST, '_redirects'), `/index.html   /   301!
 `);
 
 fs.writeFileSync(path.join(DIST, 'site.webmanifest'), JSON.stringify({

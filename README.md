@@ -66,16 +66,19 @@ npm run serve     # 로컬 확인 (http://127.0.0.1:8080)
 - `llms.txt` — 사실 요약과 자료 출처
 - IndexNow 키는 `data/site.config.json` 의 `indexNowKey` 로 루트에 떨어진다. **키는 사이트마다 달라야 한다.**
 
-## 호스팅
+## 호스팅 — Netlify
 
-`dist/_headers` 와 `dist/_redirects` 를 빌드가 함께 떨어뜨린다. Cloudflare Pages·Workers 정적 자산, Netlify 모두 그대로 읽는다.
+`https://vital-ease.netlify.app` (2026-10-12 배포).
+★서브도메인 `vitalease` 는 남이 선점해 `vital-ease` 로 잡았다. Netlify 서브도메인은 전 세계 공용이다.
 
 | | |
 |---|---|
 | 빌드 명령 | `npm run build` (= `node src/build.mjs`) |
 | 출력 폴더 | `dist` |
-| Node | 20 |
-| Workers Builds | `wrangler.jsonc` 참고 (main 없는 자산 전용 워커) |
+| Node | 20 (`netlify.toml`) |
+
+`dist/_headers` 와 `dist/_redirects` 를 빌드가 함께 떨어뜨린다 — Netlify 와 Cloudflare 가 같은 형식을 읽으므로
+호스트를 옮겨도 빌드를 고칠 일이 없다. 빌드는 `URL`(Netlify) · `CF_PAGES_URL`(Cloudflare) · `SITE_URL` 순으로 본다.
 
 ★`data/site.config.json` 의 `siteUrl` 은 **배포 주소를 확인한 뒤** 그 값으로 바꾸고 다시 빌드한다.
-canonical·사이트맵·RSS·llms.txt·OG 가 전부 이 값을 쓴다. 지금은 `https://vitalease.yovip77.workers.dev` 로 잡아 두었다.
+canonical·사이트맵·RSS·llms.txt·OG 가 전부 이 값을 쓴다.
